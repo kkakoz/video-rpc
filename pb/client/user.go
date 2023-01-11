@@ -15,7 +15,7 @@ func NewUserClient(ctx context.Context, etcdClient *clientv3.Client) (userpb.Use
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 
 	conn, err := grpc.Dial(
-		r.Scheme()+":///"+loadbalancing.UserServName,
+		r.Scheme()+":///"+userpb.AppName,
 		grpc.WithDefaultServiceConfig(grpcServiceConfig),
 		grpc.WithInsecure(),
 	)

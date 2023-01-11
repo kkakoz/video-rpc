@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/kkakoz/pkg/app"
 	"github.com/kkakoz/video-rpc/internal/user/bootstrap"
+	userpb "github.com/kkakoz/video-rpc/pb/user"
 	"github.com/kkakoz/video-rpc/pkg/etcdx"
 	"github.com/kkakoz/video-rpc/pkg/loadbalancing"
 	"github.com/spf13/viper"
@@ -15,11 +16,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	appName := "user-server"
 
-	_, err = loadbalancing.NewServiceRegister(context.TODO(), etcdx.Client(), appName, viper.GetString("ip")+":"+viper.GetString("app.port"))
+	_, err = loadbalancing.NewServiceRegister(context.TODO(), etcdx.Client(), userpb.AppName, viper.GetString("ip")+":"+viper.GetString("app.port"))
 
-	app := app.NewApp(appName, servers...)
+	app := app.NewApp(userpb.AppName, servers...)
 
 	if err = app.Start(context.TODO()); err != nil {
 		log.Fatal(err)

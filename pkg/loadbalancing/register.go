@@ -9,9 +9,7 @@ import (
 )
 
 const (
-	UserServName  = "user-serv"
-	AnimeServName = "anime-serv"
-	CountServName = "count-serv"
+	UserServName = "user-serv"
 )
 
 type ServiceRegister struct {

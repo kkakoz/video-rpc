@@ -30,7 +30,7 @@ func NewServiceDiscovery(ctx context.Context, cli *clientv3.Client) *ServiceDisc
 func (s *ServiceDiscovery) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	s.cc = cc
 	s.servermap = make(map[string]resolver.Address)
-	prefix := "/" + target.URL.Scheme + "/" + target.URL.Path + "/"
+	prefix := "/" + target.URL.Scheme + target.URL.Path + "/"
 	res, err := s.cli.Get(s.ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
