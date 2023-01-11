@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./;common";
+option java_multiple_files = true;
+
+enum ErrorReason {
+  GREETER_UNSPECIFIED = 0;
+  USER_NOT_FOUND = 1;
+}

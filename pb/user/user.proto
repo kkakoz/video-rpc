@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option go_package = "video-rpc/pb/userpb;userpb";
+
+import "pb/common/common.proto";
+import "google/protobuf/timestamp.proto";
+
+service UserHandler {
+  rpc Login (LoginReq) returns (LoginRes) {
+  };
+
+  rpc Register (RegisterReq) returns (Res) {
+  };
+
+  rpc UserInfo (ID) returns (UserInfoRes) {
+  };
+}
+
+message LoginReq {
+  string name = 1;
+  string password = 2;
+}
+
+message LoginRes {
+  string token = 1;
+}
+
+message RegisterReq {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message UserInfoRes {
+  int64 ID = 1;
+  uint32 type = 2;
+  string name = 3;
+  string avatar = 4;
+  string brief = 5;
+  int64 followCount = 6;
+  int64 fansCount = 7;
+  int64 likeCount = 8;
+  int32 state = 9;
+  google.protobuf.Timestamp lastLogin = 10;
+  string email = 11;
+  string phone = 12;
+  google.protobuf.Timestamp createdAt = 13;
+  google.protobuf.Timestamp updatedAt = 14;
+  google.protobuf.Timestamp deletedAt = 15;
+}
+

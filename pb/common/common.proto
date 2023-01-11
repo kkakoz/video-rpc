@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option go_package = "video-rpc/pb/common;common";
+
+message Res {
+  int32 code = 1;
+  string reason = 2;
+  string message = 3;
+  map<string, string> metadata = 4;
+};
+
+message ID {
+  int64 id = 1;
+}
+
+enum Code {
+  Err = 0;
+  Ok = 200;
+}
+
+message Event {
+  EventType eventType = 1;
+  int64  targetId = 2;
+  TargetType targetType = 3;
+  int64  ActorId = 4;
+  int64 targetOwnerId = 5;
+}
+
+enum EventType {
+  EventTypeNone = 0;
+  UserRegister = 1;
+  Mail = 2;
+  Like = 3;
+  DisLike = 4;
+  Follow = 5;
+  UnFollow = 6;
+  CommentVideo = 7;
+  CalculateHot = 8;
+}
+
+
+
+enum TargetType {
+  TargetTypeNone = 0;
+  Video = 1;
+  Comment = 2;
+  SubComment = 3;
+}
