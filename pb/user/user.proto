@@ -2,18 +2,22 @@ syntax = "proto3";
 
 option go_package = "video-rpc/pb/userpb;userpb";
 
-import "pb/common/common.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 service UserHandler {
   rpc Login (LoginReq) returns (LoginRes) {
   };
 
-  rpc Register (RegisterReq) returns (Res) {
+  rpc Register (RegisterReq) returns (google.protobuf.Empty) {
   };
 
   rpc UserInfo (ID) returns (UserInfoRes) {
   };
+}
+
+message ID {
+  int64 id = 1;
 }
 
 message LoginReq {

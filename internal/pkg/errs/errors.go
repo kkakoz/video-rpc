@@ -3,8 +3,8 @@ package errs
 import (
 	"errors"
 	"fmt"
+	httpstatus "github.com/kkakoz/video-rpc/internal/pkg/errs/status"
 	"runtime/debug"
-	httpstatus "video-rpc/internal/pkg/errs/status"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"

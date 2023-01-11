@@ -5,10 +5,10 @@ import (
 	cluster "github.com/bsm/sarama-cluster"
 	"github.com/kkakoz/pkg/app/kafkas"
 	"github.com/kkakoz/pkg/logger"
+	"github.com/kkakoz/video-rpc/pb/common"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"video-rpc/pb/common"
 )
 
 type EventConsumer struct {

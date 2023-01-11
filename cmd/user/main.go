@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"github.com/kkakoz/pkg/app"
+	"github.com/kkakoz/video-rpc/internal/user/bootstrap"
+	"github.com/kkakoz/video-rpc/pkg/etcdx"
+	"github.com/kkakoz/video-rpc/pkg/loadbalancing"
 	"github.com/spf13/viper"
 	"log"
-	"video-rpc/internal/user/bootstrap"
-	"video-rpc/pkg/etcdx"
-	"video-rpc/pkg/loadbalancing"
 )
 
 func main() {

@@ -2,11 +2,11 @@ package client
 
 import (
 	"context"
+	userpb "github.com/kkakoz/video-rpc/pb/user"
+	"github.com/kkakoz/video-rpc/pkg/loadbalancing"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
-	userpb "video-rpc/pb/user"
-	"video-rpc/pkg/loadbalancing"
 )
 
 func NewUserClient(ctx context.Context, etcdClient *clientv3.Client) (userpb.UserHandlerClient, error) {

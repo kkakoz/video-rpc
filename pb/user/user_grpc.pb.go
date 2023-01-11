@@ -11,7 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	common "video-rpc/pb/common"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,8 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserHandlerClient interface {
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
-	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*common.Res, error)
-	UserInfo(ctx context.Context, in *common.ID, opts ...grpc.CallOption) (*UserInfoRes, error)
+	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UserInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserInfoRes, error)
 }
 
 type userHandlerClient struct {
@@ -45,8 +45,8 @@ func (c *userHandlerClient) Login(ctx context.Context, in *LoginReq, opts ...grp
 	return out, nil
 }
 
-func (c *userHandlerClient) Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*common.Res, error) {
-	out := new(common.Res)
+func (c *userHandlerClient) Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/UserHandler/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (c *userHandlerClient) Register(ctx context.Context, in *RegisterReq, opts 
 	return out, nil
 }
 
-func (c *userHandlerClient) UserInfo(ctx context.Context, in *common.ID, opts ...grpc.CallOption) (*UserInfoRes, error) {
+func (c *userHandlerClient) UserInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserInfoRes, error) {
 	out := new(UserInfoRes)
 	err := c.cc.Invoke(ctx, "/UserHandler/UserInfo", in, out, opts...)
 	if err != nil {
@@ -68,8 +68,8 @@ func (c *userHandlerClient) UserInfo(ctx context.Context, in *common.ID, opts ..
 // for forward compatibility
 type UserHandlerServer interface {
 	Login(context.Context, *LoginReq) (*LoginRes, error)
-	Register(context.Context, *RegisterReq) (*common.Res, error)
-	UserInfo(context.Context, *common.ID) (*UserInfoRes, error)
+	Register(context.Context, *RegisterReq) (*emptypb.Empty, error)
+	UserInfo(context.Context, *ID) (*UserInfoRes, error)
 	mustEmbedUnimplementedUserHandlerServer()
 }
 
@@ -80,10 +80,10 @@ type UnimplementedUserHandlerServer struct {
 func (UnimplementedUserHandlerServer) Login(context.Context, *LoginReq) (*LoginRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedUserHandlerServer) Register(context.Context, *RegisterReq) (*common.Res, error) {
+func (UnimplementedUserHandlerServer) Register(context.Context, *RegisterReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedUserHandlerServer) UserInfo(context.Context, *common.ID) (*UserInfoRes, error) {
+func (UnimplementedUserHandlerServer) UserInfo(context.Context, *ID) (*UserInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserInfo not implemented")
 }
 func (UnimplementedUserHandlerServer) mustEmbedUnimplementedUserHandlerServer() {}
@@ -136,7 +136,7 @@ func _UserHandler_Register_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _UserHandler_UserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(common.ID)
+	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func _UserHandler_UserInfo_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/UserHandler/UserInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserHandlerServer).UserInfo(ctx, req.(*common.ID))
+		return srv.(UserHandlerServer).UserInfo(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }

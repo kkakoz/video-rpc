@@ -1,4 +1,4 @@
-module video-rpc
+module github.com/kkakoz/video-rpc
 
 go 1.18
 

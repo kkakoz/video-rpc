@@ -13,19 +13,20 @@ import (
 	"github.com/kkakoz/pkg/cryption"
 	"github.com/kkakoz/pkg/errno"
 	"github.com/kkakoz/pkg/redisx"
+	"github.com/kkakoz/video-rpc/internal/pkg/async/producer"
+	"github.com/kkakoz/video-rpc/internal/pkg/emailx"
+	"github.com/kkakoz/video-rpc/internal/pkg/errs"
+	"github.com/kkakoz/video-rpc/internal/pkg/keys"
+	"github.com/kkakoz/video-rpc/internal/user/logic/internal/repo"
+	"github.com/kkakoz/video-rpc/internal/user/model/entity"
+	"github.com/kkakoz/video-rpc/pb/common"
+	userpb "github.com/kkakoz/video-rpc/pb/user"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"strings"
 	"time"
-	"video-rpc/internal/pkg/async/producer"
-	"video-rpc/internal/pkg/emailx"
-	"video-rpc/internal/pkg/errs"
-	"video-rpc/internal/pkg/keys"
-	"video-rpc/internal/user/logic/internal/repo"
-	"video-rpc/internal/user/model/entity"
-	"video-rpc/pb/common"
-	userpb "video-rpc/pb/user"
 )
 
 type user struct {
@@ -81,7 +82,7 @@ func (u user) Login(ctx context.Context, req *userpb.LoginReq) (*userpb.LoginRes
 	return &userpb.LoginRes{Token: token}, nil
 }
 
-func (u user) Register(ctx context.Context, req *userpb.RegisterReq) (*common.Res, error) {
+func (u user) Register(ctx context.Context, req *userpb.RegisterReq) (*emptypb.Empty, error) {
 	err := ormx.Transaction(ctx, func(ctx context.Context) error {
 
 		salt := cryption.UUID()
@@ -144,9 +145,7 @@ func (u user) Register(ctx context.Context, req *userpb.RegisterReq) (*common.Re
 	if err != nil {
 		return nil, err
 	}
-	return &common.Res{
-		Code: 200,
-	}, nil
+	return &emptypb.Empty{}, nil
 }
 
 var html = `
@@ -164,7 +163,7 @@ var html = `
 </html>
 `
 
-func (u user) UserInfo(ctx context.Context, id *common.ID) (*userpb.UserInfoRes, error) {
+func (u user) UserInfo(ctx context.Context, id *userpb.ID) (*userpb.UserInfoRes, error) {
 	//TODO implement me
 	panic("implement me")
 }

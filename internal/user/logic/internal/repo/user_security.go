@@ -2,8 +2,8 @@ package repo
 
 import (
 	"github.com/kkakoz/ormx"
+	"github.com/kkakoz/video-rpc/internal/user/model/entity"
 	"sync"
-	"video-rpc/internal/user/model/entity"
 )
 
 type userSecurityRepo struct {
