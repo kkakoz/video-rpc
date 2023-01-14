@@ -63,6 +63,7 @@ func InitApp() ([]app.Server, error) {
 	s := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		grpc_prometheus.UnaryServerInterceptor,
 		grpc_recovery.UnaryServerInterceptor(grpcx.RecoveryInterceptor()),
+		grpcx.ServerErrorInterceptor,
 	),
 	))
 	userpb.RegisterUserHandlerServer(s, handler.User())

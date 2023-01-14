@@ -17,7 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, err = loadbalancing.NewServiceRegister(context.TODO(), etcdx.Client(), userpb.AppName, viper.GetString("ip")+":"+viper.GetString("app.port"))
+	_, err = loadbalancing.NewServiceRegister(context.TODO(), etcdx.Client(), userpb.AppName, viper.GetString("KUBERNETES_SERVICE_HOST")+":"+viper.GetString("app.port"))
 
 	app := app.NewApp(userpb.AppName, servers...)
 

@@ -11,7 +11,6 @@ import (
 	"github.com/kkakoz/ormx"
 	"github.com/kkakoz/ormx/opt"
 	"github.com/kkakoz/pkg/cryption"
-	"github.com/kkakoz/pkg/errno"
 	"github.com/kkakoz/pkg/redisx"
 	"github.com/kkakoz/video-rpc/internal/pkg/async/producer"
 	"github.com/kkakoz/video-rpc/internal/pkg/emailx"
@@ -45,14 +44,14 @@ func (u user) Login(ctx context.Context, req *userpb.LoginReq) (*userpb.LoginRes
 	}
 	user, err := repo.User().Get(ctx, options...)
 	if user == nil {
-		return nil, errno.New400("账号不存在")
+		return nil, errs.New(400, "", "账号不存在")
 	}
 	if err != nil {
 		return nil, err
 	}
 
 	if user.State == entity.UserStateRegister {
-		return nil, errno.New400("账号未激活")
+		return nil, errs.New(400, "", "账号未激活")
 	}
 
 	security, err := repo.UserSecurity().Get(ctx, opt.Where("user_id = ?", user.ID))
@@ -60,10 +59,10 @@ func (u user) Login(ctx context.Context, req *userpb.LoginReq) (*userpb.LoginRes
 		return nil, err
 	}
 	if security == nil {
-		return nil, errno.New400("账号不存在")
+		return nil, errs.New(400, "", "账号不存在")
 	}
 	if security.Password != cryption.Md5Str(req.Password+security.Salt) {
-		return nil, errno.New400("密码错误")
+		return nil, errs.New(400, "", "密码错误")
 	}
 	token := cryption.UUID()
 	target := &entity.User{}
@@ -164,6 +163,14 @@ var html = `
 `
 
 func (u user) UserInfo(ctx context.Context, id *userpb.ID) (*userpb.UserInfoRes, error) {
-	//TODO implement me
-	panic("implement me")
+	user, err := repo.User().GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	res := &userpb.UserInfoRes{}
+	err = copier.Copy(res, user)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

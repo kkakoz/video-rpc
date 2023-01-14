@@ -1,3 +1,6 @@
+include .env
+
+SEED := $(shell perl -e "print int(rand(1000000))")
 
 
 
@@ -7,12 +10,12 @@ docker-run:
 	docker rm -f videoweb
 	docker run -d --restart=always -p 9010:9010 --name videoweb -v /mnt/e/code/video_web/configs/conf.yaml:/app/configs/conf.yaml videoweb:${VERSION}-${SEED}
 
-.PHONY: docker-push
-docker-push:
-	docker build . --tag videoweb:${VERSION}-${SEED} -f ./Dockerfile
-	docker tag videoweb:${VERSION}-${SEED} ${ADDR}:${VERSION}-${SEED}
+.PHONY: docker-push-user
+docker-push-user:
+	docker build . --tag video-rpc-user:${VERSION}-${SEED} -f ./Dockerfile-user
+	docker tag video-rpc-user:${VERSION}-${SEED} ${ADDR_USER}:${VERSION}-${SEED}
 	echo ${PASSWORD}  |  docker login --username=${USERNAME} registry.cn-hangzhou.aliyuncs.com --password-stdin
-	docker push ${ADDR}:${VERSION}-${SEED}
+	docker push ${ADDR_USER}:${VERSION}-${SEED}
 
 
 .PHONY: protoc

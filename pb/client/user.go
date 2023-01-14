@@ -9,15 +9,20 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func NewUserClient(ctx context.Context, etcdClient *clientv3.Client) (userpb.UserHandlerClient, error) {
+func NewUserClient(ctx context.Context, etcdClient *clientv3.Client, interceptors ...grpc.UnaryClientInterceptor) (userpb.UserHandlerClient, error) {
 	r := loadbalancing.NewServiceDiscovery(ctx, etcdClient)
 	resolver.Register(r)
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 
+	opts := []grpc.DialOption{grpc.WithDefaultServiceConfig(grpcServiceConfig), grpc.WithInsecure()}
+
+	for _, interceptor := range interceptors {
+		opts = append(opts, grpc.WithUnaryInterceptor(interceptor))
+	}
+
 	conn, err := grpc.Dial(
 		r.Scheme()+":///"+userpb.AppName,
-		grpc.WithDefaultServiceConfig(grpcServiceConfig),
-		grpc.WithInsecure(),
+		opts...,
 	)
 	if err != nil {
 		return nil, err
