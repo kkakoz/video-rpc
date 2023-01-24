@@ -2,91 +2,98 @@ package loadbalancing
 
 import (
 	"context"
-	"fmt"
+	"github.com/kkakoz/pkg/gox"
+	"github.com/kkakoz/pkg/logger"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"log"
+	"go.uber.org/zap"
 	"time"
 )
 
-const (
-	UserServName = "user-serv"
-)
-
 type ServiceRegister struct {
-	ctx       context.Context
 	cli       *clientv3.Client
 	leaseId   clientv3.LeaseID
 	retry     chan struct{} // 因为网络问题断开后的重试channel
-	retryTime int64         // 重试间隔时间
+	retryTime time.Duration // 重试间隔时间
 	key       string
 	val       string
+	cancel    context.CancelFunc
+
 	//keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse
+}
+
+func (s *ServiceRegister) Start(ctx context.Context) error {
+	err := s.putKeyWithLease(ctx) // 第一次服务注册
+	if err != nil {
+		return err
+	}
+	s.RegisterAndKeepalive(ctx) // 服务注册重试
+	return nil
+}
+
+func (s *ServiceRegister) Stop(ctx context.Context) error {
+	logger.Info("invoke close")
+	s.cancel()
+	if _, err := s.cli.Revoke(ctx, s.leaseId); err != nil {
+		return err
+	}
+	return nil
 }
 
 const leaseTime int64 = 20
 
 // 注册到etcd
-func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string) (*ServiceRegister, error) {
-	s := &ServiceRegister{
-		ctx:       ctx,
+func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string) *ServiceRegister {
+	ctx, cancel := context.WithCancel(ctx)
+	return &ServiceRegister{
+		cancel:    cancel,
 		cli:       cli,
-		retryTime: 20,
+		retryTime: 20 * time.Second,
 		retry:     make(chan struct{}),
 		key:       "/" + schema + "/" + serName + "/" + addr,
 		val:       addr,
 	}
-	err := s.putKeyWithLease() // 第一次服务注册
-	if err != nil {
-		return nil, err
-	}
-	go s.RegisterAndKeeplive() // 服务注册重试
-	return s, nil
 }
 
-func (s *ServiceRegister) putKeyWithLease() error {
-	res, err := s.cli.Grant(s.ctx, leaseTime)
+func (s *ServiceRegister) putKeyWithLease(ctx context.Context) error {
+	logger.Info("register etcd")
+	res, err := s.cli.Grant(ctx, leaseTime)
 	if err != nil {
 		return err
 	}
 	s.leaseId = res.ID
-	_, err = s.cli.Put(s.ctx, s.key, s.val, clientv3.WithLease(s.leaseId))
+	_, err = s.cli.Put(ctx, s.key, s.val, clientv3.WithLease(s.leaseId))
 	if err != nil {
 		return err
 	}
-	resChan, err := s.cli.KeepAlive(s.ctx, s.leaseId)
+	resChan, err := s.cli.KeepAlive(ctx, s.leaseId)
 	if err != nil {
 		return err
 	}
 	//s.keepAliveChan = resChan
-	go func() {
+	gox.Go(func() {
 		for range resChan {
-
 		}
 		// keepalive关闭
 		s.retry <- struct{}{}
-	}()
+	})
 	return nil
 }
 
-func (s *ServiceRegister) Close() error {
-	log.Println("invoke close")
-	if _, err := s.cli.Revoke(s.ctx, s.leaseId); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *ServiceRegister) RegisterAndKeeplive() {
-	select {
-	case <-s.ctx.Done():
-		return
-	case <-s.retry:
-		fmt.Println("retry")
-		time.Sleep(time.Duration(s.retryTime) * time.Second)
-		err := s.putKeyWithLease() // 重新进行服务注册
-		if err != nil {
-			log.Println("注册服务失败,err:", err.Error())
-			s.retry <- struct{}{}
+func (s *ServiceRegister) RegisterAndKeepalive(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-s.retry:
+			logger.Info("retry register etcd")
+			err := s.putKeyWithLease(ctx) // 重新进行服务注册
+			if err != nil {
+				logger.Error("注册服务失败,err:", zap.Error(err))
+				time.Sleep(s.retryTime)
+				s.retry <- struct{}{}
+			}
+			logger.Info("retry register succeeded")
 		}
 	}
+
 }

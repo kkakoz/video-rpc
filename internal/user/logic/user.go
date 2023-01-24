@@ -74,7 +74,7 @@ func (u user) Login(ctx context.Context, req *userpb.LoginReq) (*userpb.LoginRes
 	if err != nil {
 		return nil, err
 	}
-	err = redisx.Client().Set(keys.TokenKey(token), data, time.Hour*24*3).Err()
+	err = redisx.Client().Set(ctx, keys.TokenKey(token), data, time.Hour*24*3).Err()
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (u user) Register(ctx context.Context, req *userpb.RegisterReq) (*emptypb.E
 
 		// 发送激活邮件
 		code := uuid.NewV4().String()
-		_, err = redisx.Client().Set(keys.UserActive(user.ID), code, time.Hour*24*3).Result()
+		_, err = redisx.Client().Set(ctx, keys.UserActive(user.ID), code, time.Hour*24*3).Result()
 		if err != nil {
 			return err
 		}

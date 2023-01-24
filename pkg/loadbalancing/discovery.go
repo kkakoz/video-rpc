@@ -2,9 +2,10 @@ package loadbalancing
 
 import (
 	"context"
+	"github.com/kkakoz/pkg/gox"
+	"github.com/kkakoz/pkg/logger"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc/resolver"
-	"log"
 	"sync"
 )
 
@@ -36,12 +37,14 @@ func (s *ServiceDiscovery) Build(target resolver.Target, cc resolver.ClientConn,
 		return nil, err
 	}
 	for _, v := range res.Kvs {
-		log.Println("register address:", string(v.Value))
+		logger.Debug("add address: " + string(v.Value))
 		s.SetServerAddress(string(v.Key), string(v.Value))
 	}
 	s.cc.NewAddress(s.getServices())
 	//监视前缀，修改变更的server
-	go s.watcher(prefix)
+	gox.Go(func() {
+		s.watcher(prefix)
+	})
 	return s, nil
 }
 
@@ -54,7 +57,7 @@ func (s *ServiceDiscovery) SetServerAddress(key, value string) {
 	defer s.lock.Unlock()
 	s.servermap[key] = resolver.Address{Addr: value}
 	s.cc.NewAddress(s.getServices())
-	log.Println("put key:", key, "value:", value)
+	logger.Debug("register key:" + key + " value:" + value)
 }
 
 func (s *ServiceDiscovery) DelServerAddress(key string) {
@@ -62,7 +65,7 @@ func (s *ServiceDiscovery) DelServerAddress(key string) {
 	defer s.lock.Unlock()
 	delete(s.servermap, key)
 	s.cc.NewAddress(s.getServices())
-	log.Println("del key:", key)
+	logger.Debug("del service key:" + key)
 }
 
 func (s *ServiceDiscovery) watcher(prefix string) {
@@ -80,11 +83,10 @@ func (s *ServiceDiscovery) watcher(prefix string) {
 }
 
 func (s *ServiceDiscovery) ResolveNow(options resolver.ResolveNowOptions) {
-	log.Println("ResolveNow")
 }
 
 func (s *ServiceDiscovery) Close() {
-	log.Println("resolve close")
+	logger.Info("service discover closed")
 }
 
 //GetServices 获取服务地址
